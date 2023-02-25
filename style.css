@@ -1,0 +1,67 @@
+:root {
+  --tile-color: rgb(40, 40, 40);
+  --hidden-color: rgb(20, 20, 20);
+  --animation-red-color: rgb(139, 0, 0);
+  --hidden-color: --tile-color;
+}
+
+body {
+  margin: 0;
+  display: flex;
+  align-items: center;
+  font-size: 3rem;
+  flex-direction: column;
+  color: white;
+}
+
+.field {
+  display: grid;
+  grid-template-columns: repeat(var(--size), 1fr);
+  grid-template-rows: repeat(var(--size), 1fr);
+  gap: 4px;
+  opacity: 0;
+  transition: opacity 1s ease-in-out;
+}
+
+.field.shown {
+  opacity: 1;
+}
+
+.tile {
+  border-radius: 1rem;
+  width: 100px;
+  height: 100px;
+  transition: background-color 0.3s ease-in-out;
+  background-color: var(--tile-color);
+}
+
+.tile.actived {
+  animation: click 0.5s forwards;
+}
+
+.tile.flag {
+  --tile-color: rgb(119, 119, 119);
+}
+
+.tile.actived.safe {
+  --tile-color: rgb(0, 101, 0);
+}
+
+.tile.actived.mine {
+  --tile-color: rgb(175, 0, 0);
+}
+
+@keyframes click {
+  0% {
+    background-color: var(--hidden-color);
+    transform: scale(1);
+  }
+  25% {
+    background-color: var(--animation-red-color);
+    transform: scale(0.6);
+  }
+  100% {
+    background-color: var(--tile-color); /* color inicial al finalizar */
+    transform: scale(1);
+  }
+}

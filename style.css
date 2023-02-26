@@ -1,72 +1,100 @@
-@import url('https://fonts.googleapis.com/css2?family=Roboto&display=swap');
-
+@import url("https://fonts.googleapis.com/css2?family=VT323&display=swap");
 
 :root {
   --tile-color: rgb(40, 40, 40);
   --hidden-color: rgb(20, 20, 20);
   --animation-red-color: rgb(139, 0, 0);
   --hidden-color: --tile-color;
+  --font-size: 3rem;
 }
 
 body {
+  user-select: none;
   margin: 0;
   display: flex;
   align-items: center;
-  font-size: 3rem;
+  font-size: var(--font-size);
   flex-direction: column;
   color: white;
 }
 
-.field__container{
+.field__container {
   position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 90%; 
 }
 
-#message{
-  color: red;
+#message,
+#retry {
+  --font-size: 6rem;
+  font-family: "VT323", monospace;
   position: absolute;
-  top: -50%;
-  left: 50%;
-  transform: translateX(-50%);
-  font-family: "Roboto",sans-serif;
-  font-size: 4rem;
-  /* opacity: 0; */
-  /* animation: fade-in 0.5s forwards; */
-  z-index: 2;
+  text-shadow: 2px 2px 7px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  color: rgb(188, 28, 28);
+  z-index: 3;
+}
+
+#retry {
+  color: #777777;
+  top: 55%;
+  width: auto;
+  --font-size: 4rem;
+  animation: show-text 1s ease-in-out forwards;
+}
+
+.shown {
+  opacity: 1;
+  animation: show-text 1s ease-in-out forwards;
+}
+
+@keyframes show-text {
+  0% {
+    opacity: 0;
+    transform: rotate(-180deg);
+    font-size: 0px;
+  }
+
+  75% {
+    font-size: 8rem;
+  }
+  100% {
+    opacity: 1;
+    transform: rotate(0deg);
+    font-size: var(--font-size);
+  }
+}
+
+.field {
+  padding: 4rem;
+  display: grid;
+  grid-template-columns: repeat(var(--size), 1fr);
+  
+  gap: 4px;
+  opacity: 1;
+  animation: fade-in 1s ease-in-out;
 }
 
 @keyframes fade-in {
-  from {
+  0% {
     opacity: 0;
-    transform: translateY(-500%);
   }
-  to {
+  100% {
     opacity: 1;
-    transform: translateY(-50%);
   }
-}
-
-
-.field {
-  margin: 4rem;
-  display: grid;
-  grid-template-columns: repeat(var(--size), 1fr);
-  grid-template-rows: repeat(var(--size), 1fr);
-  gap: 4px;
-  opacity: 0;
-  transition: opacity 1s ease-in-out;
-}
-
-.field.shown {
-  opacity: 1;
 }
 
 .tile {
-  font-family: "Roboto", sans-serif;
-  text-align: center;
-  vertical-align: center;
-  border-radius: 1rem;
-  width: 50px;
-  height: 50px;
+  display: flex;
+  align-items: center;
+  font-family: "VT323", monospace;
+  justify-content: center;
+  border-radius: 12px;
+  width: 40px;
+  height: 40px;
+
   transition: background-color 0.3s ease-in-out;
   background-color: var(--tile-color);
 }
@@ -76,6 +104,7 @@ body {
 }
 
 .tile.flag {
+  font-size: 1.5rem;
   --tile-color: rgb(119, 119, 119);
 }
 

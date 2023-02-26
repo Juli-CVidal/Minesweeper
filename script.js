@@ -2,11 +2,10 @@ const FIELD_SIZE = 10;
 const NUMBER_OF_MINES = 10;
 
 const FIELD = document.querySelector(".field");
-FIELD.addEventListener("contextmenu", (event) => event.preventDefault());
-setTimeout(() => {
-  FIELD.classList.add("shown");
-}, 1000);
+const MESSAGE = document.getElementById("message");
+const RETRY_BTN = document.getElementById("retry");
 
+/*===== CREATING THE BOARD =====*/
 function createBoard(fieldSize) {
   return Array.from({ length: fieldSize }, (_, x) =>
     Array.from({ length: fieldSize }, (_, y) => {
@@ -44,7 +43,9 @@ function getMinePositions(numberOfMines) {
     : mines.concat(getMinePositions(numberOfMines - 1));
 }
 
-function nearbyTiles({ x, y }) {
+/*===== REVEALING TILES (left click) =====*/
+function getAdjacentTiles(tile) {
+  const { x, y } = tile;
   const tiles = [];
   for (let xOffset = -1; xOffset <= 1; xOffset++) {
     for (let yOffset = -1; yOffset <= 1; yOffset++) {
@@ -57,19 +58,19 @@ function nearbyTiles({ x, y }) {
 }
 
 function revealTiles(tile) {
-  const { element } = tile;
+  const element = tile.element;
   if (
     element.classList.contains("actived") ||
     element.classList.contains("flag")
   )
     return;
   element.classList.add("actived");
-  element.removeEventListener("click", addClickEvent(tile));
+  element.removeEventListener("click", () => addClickEvent(tile));
   element.removeEventListener("contextmenu", addRightClickEvent);
 
   if (element.classList.contains("mine")) return;
 
-  const adjacentTiles = nearbyTiles(tile);
+  const adjacentTiles = getAdjacentTiles(tile);
   const mineTiles = adjacentTiles.filter(({ element }) =>
     element.classList.contains("mine")
   );
@@ -84,6 +85,7 @@ function revealTiles(tile) {
   }
 }
 
+/*===== CHECKING GAME CONDITIONS =====*/
 function checkWin() {
   const safeTiles = document.querySelectorAll(".tile.safe");
   const activeSafeTiles = document.querySelectorAll(".tile.safe.actived");
@@ -93,45 +95,71 @@ function checkWin() {
 function checkLose() {
   return document.querySelectorAll(".tile.mine.actived").length !== 0;
 }
+function activateMineTiles() {
+  const mineTiles = document.querySelectorAll(".tile.mine");
+  mineTiles.forEach((tile, index) => {
+    setTimeout(() => {
+      tile.classList.add("actived");
+    }, (index + 1) * 25);
+  });
+}
+
+function addRetryButton() {
+  const FIELD_CONTAINER = FIELD.parentNode;
+
+  FIELD_CONTAINER.insertAdjacentHTML(
+    "beforeend",
+    '<a id="retry" href="javascript:location.reload()">Retry</a>'
+  );
+}
+
+function showEndMessage(message) {
+  MESSAGE.textContent = message;
+  FIELD.addEventListener("click", stopProp, { capture: true });
+  FIELD.addEventListener("contextmenu", stopProp, { capture: true });
+  setTimeout(() => MESSAGE.classList.add("shown"), 500);
+  setTimeout(() => addRetryButton(), 1000);
+}
 
 function checkGameEnd() {
   const lose = checkLose();
   const win = checkWin();
 
   if (lose) {
-    document.querySelectorAll(".tile.mine").forEach((tile, index) => {
-      setTimeout(() => {
-        tile.classList.add("actived");
-      }, (index + 1) * 25);
-    });
-    
-    document.getElementById("message").textContent = "You Lose :c";
-  }else if (win) {
-    document.getElementById("message").textContent = "YOU WIN!";
-  }
-  if (win || lose) {
-    FIELD.addEventListener("click", stopProp, { capture: true });
-    FIELD.addEventListener("contextmenu", stopProp, { capture: true });
+    activateMineTiles();
+    showEndMessage("You Lose");
+  } else if (win) {
+    showEndMessage("YOU WIN!");
+    setTimeout(() => RETRY_BTN.classList.add("shown"), 1000);
   }
 }
 
-const MINE_POSITIONS = getMinePositions(NUMBER_OF_MINES);
-const board = createBoard(FIELD_SIZE);
-console.log(board);
-
-FIELD.style.setProperty("--size", FIELD_SIZE);
-board.forEach((row) => row.forEach((tile) => FIELD.append(tile.element)));
-
+/*===== ADDING EVENT LISTENERS =====*/
 function addClickEvent(tile) {
   revealTiles(tile);
   checkGameEnd();
 }
 
 function addRightClickEvent(event) {
-  const tile = event.target;
-  tile.classList.toggle("flag");
+  const tile = event.currentTarget;
+  const hasFlag = tile.classList.contains("flag");
+  if (hasFlag) {
+    tile.classList.remove("flag");
+    tile.innerHTML = "";
+    return;
+  }
+  tile.classList.add("flag");
+  tile.innerHTML = '<i class="ri-flag-line"></i>';
 }
 
 function stopProp(e) {
   e.stopImmediatePropagation();
 }
+
+FIELD.addEventListener("contextmenu", (event) => event.preventDefault());
+const MINE_POSITIONS = getMinePositions(NUMBER_OF_MINES);
+const board = createBoard(FIELD_SIZE);
+console.log(board);
+
+FIELD.style.setProperty("--size", FIELD_SIZE);
+board.forEach((row) => row.forEach((tile) => FIELD.append(tile.element)));
